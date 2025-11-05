@@ -38,7 +38,7 @@ A full-stack web application that allows users to manage their calendar events a
 
 ### 1. Clone the repository
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Harshil-08/Slot-Swapper
 cd slotswapper
 ```
 
@@ -53,7 +53,6 @@ npm install
 ```bash
 cd client
 npm install
-cd ..
 ```
 
 ### 3. Environment Configuration
