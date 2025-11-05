@@ -1,6 +1,24 @@
 import Event from '../models/event.js';
 import SwapRequest from '../models/swapRequest.js';
+import Notification from '../models/notification.js';
 import { emitToUser } from '../socket.js';
+
+const createNotification = async (recipientId, type, message, data) => {
+  const notification = await Notification.create({
+    recipient: recipientId,
+    type,
+    message,
+    data
+  });
+  
+  emitToUser(recipientId, type, {
+    ...data,
+    message,
+    notificationId: notification._id
+  });
+  
+  return notification;
+};
 
 export const getSwappableSlots = async (req, res) => {
   try {
@@ -114,10 +132,12 @@ export const createSwapRequest = async (req, res) => {
       { path: 'theirSlot' },
     ]);
 
-    emitToUser(theirSlot.owner._id, 'swap-request-received', {
-      swapRequest,
-      message: `${req.user.name || 'Someone'} wants to swap slots with you`,
-    });
+    await createNotification(
+      theirSlot.owner._id,
+      'swap-request',
+      `${req.user.name || 'Someone'} wants to swap slots with you`,
+      { swapRequest }
+    );
 
     return res.status(201).json({
       message: 'Swap request sent successfully',
@@ -191,10 +211,12 @@ export const respondToSwapRequest = async (req, res) => {
 
       swapRequest.status = 'ACCEPTED';
 
-      emitToUser(requesterId, 'swap-request-accepted', {
-        swapRequest,
-        message: `${swapRequest.responder.name} accepted your swap request!`,
-      });
+      await createNotification(
+        requesterId,
+        'swap-accepted',
+        `${swapRequest.responder.name} accepted your swap request!`,
+        { swapRequest }
+      );
     } else {
       await Event.updateOne(
         { _id: swapRequest.mySlot._id },
@@ -208,10 +230,12 @@ export const respondToSwapRequest = async (req, res) => {
 
       swapRequest.status = 'REJECTED';
 
-      emitToUser(swapRequest.requester._id, 'swap-request-rejected', {
-        swapRequest,
-        message: `${swapRequest.responder.name} rejected your swap request`,
-      });
+      await createNotification(
+        swapRequest.requester._id,
+        'swap-rejected',
+        `${swapRequest.responder.name} rejected your swap request`,
+        { swapRequest }
+      );
     }
 
     await swapRequest.save();
@@ -258,6 +282,91 @@ export const getMySwapRequests = async (req, res) => {
     });
   } catch (error) {
     console.error('Get swap requests error:', error);
+    return res.status(500).json({ 
+      message: 'Server error',
+      success: false 
+    });
+  }
+};
+
+export const getMyNotifications = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const notifications = await Notification.find({ 
+      recipient: userId 
+    })
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    const unreadCount = await Notification.countDocuments({
+      recipient: userId,
+      read: false
+    });
+
+    return res.status(200).json({
+      notifications,
+      unreadCount,
+      success: true,
+    });
+  } catch (error) {
+    console.error('Get notifications error:', error);
+    return res.status(500).json({ 
+      message: 'Server error',
+      success: false 
+    });
+  }
+};
+
+export const markNotificationRead = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    const userId = req.user.id;
+
+    const notification = await Notification.findOne({
+      _id: notificationId,
+      recipient: userId
+    });
+
+    if (!notification) {
+      return res.status(404).json({ 
+        message: 'Notification not found',
+        success: false 
+      });
+    }
+
+    notification.read = true;
+    notification.readAt = new Date();
+    await notification.save();
+
+    return res.status(200).json({
+      message: 'Notification marked as read',
+      success: true,
+    });
+  } catch (error) {
+    console.error('Mark notification read error:', error);
+    return res.status(500).json({ 
+      message: 'Server error',
+      success: false 
+    });
+  }
+};
+
+export const markAllNotificationsRead = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    await Notification.updateMany(
+      { recipient: userId, read: false },
+      { read: true, readAt: new Date() }
+    );
+
+    return res.status(200).json({
+      message: 'All notifications marked as read',
+      success: true,
+    });
+  } catch (error) {
+    console.error('Mark all notifications read error:', error);
     return res.status(500).json({ 
       message: 'Server error',
       success: false 
