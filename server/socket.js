@@ -5,7 +5,7 @@ const connectedUsers = new Map();
 let io;
 
 export const handleWebsocket = (server) => {
-	const io = new Server(server, {
+	io = new Server(server, {
 		cors: {
 			origin: ["http://localhost:5173", "http://localhost:3000"],
 			credentials: true,
@@ -39,7 +39,7 @@ export const handleWebsocket = (server) => {
 
 export const emitToUser = (userId, event, data) => {
 	const socketId = connectedUsers.get(userId.toString());
-	if (socketId) {
+	if (socketId && io) {
 		io.to(socketId).emit(event, data);
 	}
 };

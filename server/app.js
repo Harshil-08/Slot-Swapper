@@ -32,7 +32,7 @@ app.use('/api/swap', swapRouter);
 
 const __dirname = path.resolve();
 app.use(express.static(path.join(__dirname, "/client/dist")));
-app.use("*", (req, res) => {
+app.use(/.*/, (req, res) => {
 	res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
 });
 

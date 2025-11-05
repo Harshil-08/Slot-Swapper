@@ -1,6 +1,6 @@
 import Event from '../models/event.js';
 import SwapRequest from '../models/swapRequest.js';
-import { emitToUser } from '../server.js';
+import { emitToUser } from '../socket.js';
 
 export const getSwappableSlots = async (req, res) => {
   try {
