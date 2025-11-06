@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import EventForm from './EventForm';
 import EventCard from './EventCard';
+import { API_BASE_URL } from '../../config/api';
 
 export default function MyEvents() {
   const [events, setEvents] = useState([]);
@@ -17,7 +18,7 @@ export default function MyEvents() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/api/events/my-events');
+      const response = await axios.get(`${API_BASE_URL}/api/events/my-events`);
       setEvents(response.data.events);
     } catch (err) {
       setError('Failed to load events');
@@ -51,7 +52,7 @@ export default function MyEvents() {
     if (!confirm('Are you sure you want to delete this event?')) return;
 
     try {
-      await axios.delete(`http://localhost:3000/api/events/${eventId}`);
+      await axios.delete(`${API_BASE_URL}/api/events/${eventId}`);
       fetchEvents();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete event');
@@ -62,7 +63,7 @@ export default function MyEvents() {
     const newStatus = currentStatus === 'BUSY' ? 'SWAPPABLE' : 'BUSY';
 
     try {
-      await axios.patch(`http://localhost:3000/api/events/${eventId}/status`, {
+      await axios.patch(`${API_BASE_URL}/api/events/${eventId}/status`, {
         status: newStatus,
       });
       fetchEvents();

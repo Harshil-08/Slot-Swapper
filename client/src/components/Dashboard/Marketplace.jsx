@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import EventCard from './EventCard';
 import SwapModal from './SwapModal';
+import { API_BASE_URL } from '../../config/api';
 
 export default function Marketplace() {
   const [slots, setSlots] = useState([]);
@@ -19,8 +20,8 @@ export default function Marketplace() {
     try {
       setLoading(true);
       const [slotsRes, myEventsRes] = await Promise.all([
-        axios.get('http://localhost:3000/api/swap/swappable-slots'),
-        axios.get('http://localhost:3000/api/events/my-events'),
+        axios.get(`${API_BASE_URL}/api/swap/swappable-slots`),
+        axios.get(`${API_BASE_URL}/api/events/my-events`),
       ]);
 
       setSlots(slotsRes.data.slots);

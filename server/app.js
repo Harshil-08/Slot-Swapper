@@ -19,12 +19,29 @@ const DB_URI = process.env.DB_URI;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(
-	cors({
-		origin: ["http://localhost:5173", "http://localhost:3000","https://slot-swapper-sv2a.onrender.com"],
-		credentials: true,
-	}),
-);
+
+const corsOptions = {
+	origin: function (origin, callback) {
+		if (!origin) return callback(null, true);
+
+		const allowedOrigins = [
+			"http://localhost:5173",
+			"http://localhost:3000",
+			"https://slot-swapper-sv2a.onrender.com"
+		];
+
+		if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'production') {
+			callback(null, true);
+		} else {
+			callback(new Error('Not allowed by CORS'));
+		}
+	},
+	credentials: true,
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+	allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 
 app.use('/api/auth', authRouter);
 app.use('/api/events', eventRouter);
@@ -32,7 +49,7 @@ app.use('/api/swap', swapRouter);
 
 const __dirname = path.resolve();
 app.use(express.static(path.join(__dirname, "/client/dist")));
-app.use(/.*/, (req, res) => {
+app.get(/.*/, (req, res) => {
 	res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
 });
 

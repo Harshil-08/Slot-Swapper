@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 const AuthContext = createContext();
 
@@ -30,7 +31,7 @@ export const AuthProvider = ({ children }) => {
 
 	const signup = async (name, email, password) => {
 		try {
-			const response = await axios.post('http://localhost:3000/api/auth/signup', {
+			const response = await axios.post(`${API_BASE_URL}/api/auth/signup`, {
 				name,
 				email,
 				password,
@@ -43,7 +44,7 @@ export const AuthProvider = ({ children }) => {
 
 	const login = async (email, password) => {
 		try {
-			const response = await axios.post('http://localhost:3000/api/auth/login', {
+			const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
 				email,
 				password,
 			},

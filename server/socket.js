@@ -5,10 +5,15 @@ const connectedUsers = new Map();
 let io;
 
 export const handleWebsocket = (server) => {
+	const allowedOrigins = process.env.NODE_ENV === 'production' 
+		? [process.env.CLIENT_URL || 'https://slot-swapper-sv2a.onrender.com']
+		: ["http://localhost:5173", "http://localhost:3000"];
+
 	io = new Server(server, {
 		cors: {
-			origin: ["http://localhost:5173", "http://localhost:3000","https://slot-swapper-sv2a.onrender.com"],
+			origin: allowedOrigins,
 			credentials: true,
+			methods: ["GET", "POST"]
 		},
 	});
 

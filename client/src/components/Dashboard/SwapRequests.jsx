@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 
 export default function SwapRequests() {
   const [incoming, setIncoming] = useState([]);
@@ -14,7 +15,7 @@ export default function SwapRequests() {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/api/swap/my-requests');
+      const response = await axios.get(`${API_BASE_URL}/api/swap/my-requests`);
       setIncoming(response.data.incoming);
       setOutgoing(response.data.outgoing);
     } catch (err) {
@@ -27,7 +28,7 @@ export default function SwapRequests() {
 
   const handleRespond = async (requestId, accept) => {
     try {
-      await axios.post(`http://localhost:3000/api/swap/response/${requestId}`, {
+      await axios.post(`${API_BASE_URL}/api/swap/response/${requestId}`, {
         accept,
       });
       alert(accept ? 'Swap accepted!' : 'Swap rejected');

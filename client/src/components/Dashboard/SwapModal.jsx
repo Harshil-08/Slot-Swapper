@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 
 export default function SwapModal({ theirSlot, mySlots, onClose, onSuccess }) {
   const [selectedMySlot, setSelectedMySlot] = useState('');
@@ -27,7 +28,7 @@ export default function SwapModal({ theirSlot, mySlots, onClose, onSuccess }) {
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:3000/api/swap/request', {
+      await axios.post(`${API_BASE_URL}/api/swap/request`, {
         mySlotId: selectedMySlot,
         theirSlotId: theirSlot._id,
       });

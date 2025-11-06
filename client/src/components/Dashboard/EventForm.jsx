@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api';
 
 export default function EventForm({ event, onClose, onSaved }) {
   const [title, setTitle] = useState('');
@@ -25,15 +26,14 @@ export default function EventForm({ event, onClose, onSaved }) {
 
     try {
       if (event) {
-        // Update existing event
-        await axios.put(`http://localhost:3000/api/events/${event._id}`, {
+        await axios.put(`${API_BASE_URL}/api/events/${event._id}`, {
           title,
           startTime,
           endTime,
         });
       } else {
         // Create new event
-        await axios.post('http://localhost:3000/api/events', {
+        await axios.post(`${API_BASE_URL}/api/events`, {
           title,
           startTime,
           endTime,
